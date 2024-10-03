@@ -8,6 +8,6 @@ In this example, the backend pod runs as a popen(3) server that receives shell c
 
 Running on the backend node, the server is designed to perform the following key tasks.
 
-1. Call system(3) to use the cictl CLI to retrieve the container ID and process ID <pid> the front pod.
-2. Open /proc/<pid>/ns/net that represents the Linux network namespace of the front end container process.
+1. Call system(3) to use the crictl CLI to retrieve the container ID and process ID $pid the front pod.
+2. Open /proc/$pid/ns/net that represents the Linux network namespace of the front end container process.
 3. Call setns(3)
