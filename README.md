@@ -23,9 +23,8 @@ gcc -o pop_server_ns pop_server_ns.c
 
 ### Deploy a backend pod 
 
-The docker image of the pod is based on a well known swiss army knife style troublesooting container, https://github.com/nicolaka/netshoot/.
-The binaries of the above popen(3) server and crictl are copied to the docker image.
-
+The docker image of the pod is based on a well known swiss army knife style container for network troubleshooting, https://github.com/nicolaka/netshoot/.
+More specifically, the binaries of the namespacepopen(3) server and crictl are copied to the docker image.
 ```
 cat > Dockerfile <<END
 FROM nicolaka/netshoot
@@ -37,6 +36,38 @@ END
 
 docker build -t snpsuen/backend_popen:v2 -f Dockerfile .
 ```
-
+The backend docker is then pulled to run as a kubernetes pod, characterised by two additional properties.
+*  privileged security context to allow the node to shared its entire process tree with the pod.
+*  mounting host path /run to provide a runtime container endpoint for crictl.
+```
+kubectl run backender --image=snpsuen/backend_popen:v2 \
+--overrides '
+{
+  "spec": {
+    "containers": [
+	  {
+	    "image": "snpsuen/backend_popen:v2",
+        "name": "backender",
+	    "securityContext": {"privileged": true},
+		"volumeMounts": [
+          {
+            "mountPath": "/run",
+            "name": "run-volume"
+          }
+        ]
+      }
+    ],
+    "hostPID": true,
+	 "volumes": [
+      {
+        "name": "run-volume",
+        "hostPath": {
+          "path": "/run"
+        }
+      }
+    ]
+  }
+}' -- sleep "infinity"
+```
 
 
