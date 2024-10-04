@@ -15,7 +15,7 @@ Running on the backend node, the server is designed to perform the following key
 5. Call setns(3) to return to the original Linux network namespace of the server.
 6. Go through the standard TCP concurrent server workflow with the sockets to handle each client request with popen(3) in a child process.
 
-Compile and link the source code in the file source/popen_server_ns.c.
+Build the server program from the source code in source/popen_server_ns.c.
 
 ```
 gcc -o pop_server_ns pop_server_ns.c
