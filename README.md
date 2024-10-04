@@ -36,9 +36,9 @@ END
 
 docker build -t snpsuen/backend_popen:v2 -f Dockerfile .
 ```
-The backend docker is then pulled to run as a kubernetes pod, characterised by two additional properties.
-*  privileged security context to allow the node to shared its entire process tree with the pod.
-*  mounting host path /run to provide a runtime container endpoint for crictl.
+The backend docker is then pulled to run as a kubernetes pod characterised by two additional properties.
+*  set hostPID to true to allow the node to shared its entire process tree with the pod.
+*  mounting a host path /run to provide a runtime container endpoint for crictl.
 ```
 kubectl run backender --image=snpsuen/backend_popen:v2 \
 --overrides '
