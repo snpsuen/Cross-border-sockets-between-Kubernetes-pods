@@ -23,5 +23,20 @@ gcc -o pop_server_ns pop_server_ns.c
 
 ### Deploy a backend pod 
 
-The docker image of the pod is based on a well known swiss army knife typed troublesooting container, https://github.com/nicolaka/netshoot/
-Copy the 
+The docker image of the pod is based on a well known swiss army knife style troublesooting container, https://github.com/nicolaka/netshoot/.
+The binaries of the above popen(3) server and crictl are copied to the docker image.
+
+```
+cat > Dockerfile <<END
+FROM nicolaka/netshoot
+COPY ./crictl /bin
+COPY ./popen_server_ns /bin
+USER root
+CMD ["sleep", "infinity"]
+END
+
+docker build -t snpsuen/backend_popen:v2 -f Dockerfile .
+```
+
+
+
