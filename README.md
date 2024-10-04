@@ -11,4 +11,12 @@ Running on the backend node, the server is designed to perform the following key
 1. Call system(3) to use the crictl CLI to retrieve the container ID and process ID $pid the front pod.
 2. Open /proc/$pid/ns/net that represents the Linux network namespace of the front end container process.
 3. Call setns(3) to set the Linux network namespace of the server temporarily to that of the front pod.
-4. Call socket() to create a socket listening on the front pod. From now on, any new sockets arising from the listening socket to accept new client requests will likewise reside in the front pod.
+4. Call socket() to create a socket listening on the front pod. From now on, any worker sockets springing upto accept client requests from the listening socket will likewise reside in the front pod.
+5. Call setns(3) to return to the original Linux network namespace of the server.
+6. Go through the standard TCP concurrent server workflow with the sockets to handle each client request with popen(3) in a child process.
+
+Compile and link the source code in the file source/popen_server_ns.c.
+
+```
+gcc -o pop_server_ns pop_server_ns.c
+```
