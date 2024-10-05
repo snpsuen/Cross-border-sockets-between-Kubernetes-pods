@@ -38,7 +38,7 @@ docker build -t snpsuen/backend_popen:v2 -f Dockerfile .
 ```
 The backend docker is then pulled to run as a kubernetes pod characterised by two additional properties.
 *  set hostPID to true to allow the node to shared its entire process tree with the pod.
-*  mounting a host path /run to provide a runtime container endpoint for crictl.
+*  mount a host path of /run to provide a runtime container endpoint for crictl.
 ```
 kubectl run backender --image=snpsuen/backend_popen:v2 \
 --overrides '
@@ -68,6 +68,13 @@ kubectl run backender --image=snpsuen/backend_popen:v2 \
     ]
   }
 }' -- sleep "infinity"
+```
+### Deploy a frontend pod 
+
+Run a frontend pod on Kubernetes based on another swiss army knife docker sample, https://github.com/leodotcloud/swiss-army-knife.
+
+```
+kubectl run frontender --image=leodotcloud/swiss-army-knife -- sleep infinity
 ```
 
 
