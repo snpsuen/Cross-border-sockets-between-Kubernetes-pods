@@ -16,9 +16,8 @@ Running on a backend pod, the server is designed to perform the following key ta
 6. Go through the standard TCP concurrent server workflow with the sockets to handle each client request with popen(3) in a child process.
 
 Build the server program from the source code in source/popen_server_ns.c.
-
 ```
-gcc -o pop_server_ns pop_server_ns.c
+gcc -o pop_server_ns popen_server_ns.c
 ```
 
 ### Deploy a backend pod 
@@ -36,7 +35,7 @@ END
 
 docker build -t snpsuen/backend_popen:v2 -f Dockerfile .
 ```
-The backend docker is then pulled to run as a kubernetes pod characterised by two additional properties.
+The backend docker is then pulled to run as a kubernetes pod customised with two additional properties.
 *  set hostPID to true to allow the node to shared its entire process tree with the pod.
 *  mount a host path of /run to provide a runtime container endpoint for crictl.
 ```
@@ -71,10 +70,17 @@ kubectl run backender --image=snpsuen/backend_popen:v2 \
 ```
 ### Deploy a frontend pod 
 
-Run a frontend pod on Kubernetes based on another swiss army knife docker sample, https://github.com/leodotcloud/swiss-army-knife.
+Use kubectl to run a frontend pod on the fly on Kubernetes based on another swiss army knife docker sample, https://github.com/leodotcloud/swiss-army-knife.
 
 ```
 kubectl run frontender --image=leodotcloud/swiss-army-knife -- sleep infinity
 ```
+### Deploy a client pod 
+
+Compile and link the popen(3) client program from the source in source/popen_client.c.
+```
+gcc -o pop_server_ns popen_client.c
+```
+
 
 
