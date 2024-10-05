@@ -81,6 +81,19 @@ Compile and link the popen(3) client program from the source in source/popen_cli
 ```
 gcc -o pop_server_ns popen_client.c
 ```
+Create a docker image for the client pod that by copying the binaries of the client program to the busybox image, https://hub.docker.com/_/busybox.
+```
+cat > Dockerfile <<END
+FROM busybox:latest
+COPY ./popen_client /bin
+CMD ["sleep", "infinity"]
+END
 
+docker build -t snpsuen/busypopenclient:v1 -f Dockerfile .
+```
+kubectl is subsequently invoked to run the client pod directly on the built image on kubernetes.
+```
+kubectl run busyclient2 --image=snpsuen/busypopenclient:v2
+```
 
 
