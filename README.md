@@ -91,7 +91,7 @@ END
 
 docker build -t snpsuen/busypopenclient:v1 -f Dockerfile .
 ```
-kubectl is subsequently invoked to run the client pod directly on the built image on kubernetes.
+Spin up the client pod by running it directly on the newly built docker image on kubernetes.
 ```
 kubectl run busyclient2 --image=snpsuen/busypopenclient:v2
 ```
