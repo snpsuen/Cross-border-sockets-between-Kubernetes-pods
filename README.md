@@ -133,7 +133,7 @@ pod/frontender created
 keyuser@ubunclone:~$ kubectl run busyclient2 --image=snpsuen/busypopenclient:v2
 pod/busyclient2 created
 ```
-Make sure the backend and frontend pods are running on the same K8s node.
+Observe that the backend and frontend pods are running on the same K8s node, namely ambient-worker2.
 ```
 keyuser@ubunclone:~$ kubectl get pods -o wide
 NAME          READY   STATUS    RESTARTS   AGE     IP           NODE              NOMINATED NODE   READINESS GATES
@@ -145,7 +145,7 @@ keyuser@ubunclone:~$
 Execute the popen server on the backend pod, with the frontend pod set to frontender. Note the TCP port number of the server is set arbitarily to 42855.
 ```
 keyuser@ubunclone:~$ kubectl exec -it backender -- bash
-.backender:~# popen_server_ns frontender &
+backender:~# popen_server_ns frontender &
 [1] 1536
 backender:~# WARN[0000] runtime connect using default endpoints: [unix:///run/containerd/containerd.sock unix:///run/crio/crio.sock unix:///var/run/cri-dockerd.sock]. As the default settings are now deprecated, you should set the endpoint instead.
 WARN[0000] image connect using default endpoints: [unix:///run/containerd/containerd.sock unix:///run/crio/crio.sock unix:///var/run/cri-dockerd.sock]. As the default settings are now deprecated, you should set the endpoint instead.
