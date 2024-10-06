@@ -142,7 +142,7 @@ busyclient2   1/1     Running   0          2m30s   10.244.1.5   ambient-worker2 
 frontender    1/1     Running   0          2m56s   10.244.1.4   ambient-worker2   <none>           <none>
 keyuser@ubunclone:~$
 ```
-Execute the popen server on the backend pod, with the frontend pod set to frontender. Note the TCP port number of the server is set arbitarily to 42855.
+Execute the popen(3) server on the backend pod, with the frontend pod set to frontender. Note the TCP port number of the server is set arbitarily to 42855.
 ```
 keyuser@ubunclone:~$ kubectl exec -it backender -- bash
 backender:~# popen_server_ns frontender &
@@ -153,13 +153,14 @@ WARN[0000] runtime connect using default endpoints: [unix:///run/containerd/cont
 Server is listening to port no. 42855
 backender:~#
 ```
-Execute the popen client on the client pod by setting the service endpoint to the frontend pod and port number to 42855.
+Execute the popen(3) client on the client pod by setting the service endpoint to the frontend pod and port number to 42855.
 ```
 keyuser@ubunclone:~$ kubectl exec -it busyclient2 -- sh
 / #
 / # popen_client 10.244.1.4 42855
 Enter remote command or "quit":>>
 ```
+Issue remote commands to client program and receive their results from the popen(3) server. Observe that the commands are actually executed on the backend pod.
 
 
 
