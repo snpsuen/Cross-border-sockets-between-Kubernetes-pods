@@ -95,5 +95,44 @@ Spin up the client pod by running it directly on the newly built docker image on
 ```
 kubectl run busyclient2 --image=snpsuen/busypopenclient:v2
 ```
+### Try out the whole thing
+
+Deploy the backend, frontend and client pods on Kubernetes.
+```
+keyuser@ubunclone:~$ kubectl run backender --image=snpsuen/backend_popen:v2 \
+--overrides '
+{
+  "spec": {
+    "containers": [
+          {
+            "image": "snpsuen/backend_popen:v2",
+        "name": "backender",
+            "securityContext": {"privileged": true},
+                "volumeMounts": [
+          {
+            "mountPath": "/run",
+            "name": "run-volume"
+          }
+        ]
+      }
+    ],
+    "hostPID": true,
+         "volumes": [
+      {
+        "name": "run-volume",
+        "hostPath": {
+          "path": "/run"
+        }
+      }
+    ]
+  }
+}'
+pod/backender created
+keyuser@ubunclone:~$ kubectl run frontender --image=leodotcloud/swiss-army-knife -- sleep infinity
+pod/frontender created
+keyuser@ubunclone:~$ kubectl run busyclient2 --image=snpsuen/busypopenclient:v2
+pod/busyclient2 created
+```
+
 
 
