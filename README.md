@@ -79,7 +79,7 @@ kubectl run frontender --image=leodotcloud/swiss-army-knife -- sleep infinity
 
 Compile and link the popen(3) client program from the source in source/popen_client.c.
 ```
-gcc -o pop_server_ns popen_client.c
+gcc -o popen_client popen_client.c
 ```
 Create a docker image for the client pod that by copying the binaries of the client program to the busybox image, https://hub.docker.com/_/busybox.
 ```
