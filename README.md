@@ -153,6 +153,23 @@ WARN[0000] runtime connect using default endpoints: [unix:///run/containerd/cont
 Server is listening to port no. 42855
 backender:~#
 ```
+Verify that the popen(3) server is listened at port 42855 on the frontend pod instead of the backend pod.
+```
+keyuser@ubunclone:~$ kubectl exec -it frontender -- sh
+# ss -ntlp
+State           Recv-Q            Send-Q                        Local Address:Port                        Peer Address:Port
+LISTEN          0                 5                                   0.0.0.0:42855                            0.0.0.0:*
+#
+# exit
+keyuser@ubunclone:~$
+keyuser@ubunclone:~$ kubectl exec -it backender -- bash
+backender:~# ss -ntlp
+State         Recv-Q          Send-Q                   Local Address:Port                   Peer Address:Port         Process
+backender:~#
+backender:~# exit
+exit
+keyuser@ubunclone:~$
+```
 Execute the popen(3) client on the client pod by setting the service endpoint to the frontend pod and port number to 42855.
 ```
 keyuser@ubunclone:~$ kubectl exec -it busyclient2 -- sh
