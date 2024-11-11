@@ -34,7 +34,7 @@ int set_con_ns(char* container) {
 	}
 	pclose(fout);
 
-    memset(command, 0, sizeof(command));
+        memset(command, 0, sizeof(command));
 	sprintf(command, "crictl inspect --output go-template --template \'{{.info.pid}}\' %s", containerid);
 	fout = popen(command, "r");
 	if (fscanf(fout, "%d", &cpid) != 1) {
@@ -43,13 +43,13 @@ int set_con_ns(char* container) {
 	}
 	pclose(fout);
 
-    memset(nspath, 0, sizeof(nspath));
+        memset(nspath, 0, sizeof(nspath));
 	sprintf(nspath, "/proc/%d/ns/net", cpid);
 	cfd = open(nspath, O_RDONLY | O_CLOEXEC);
 	if (cfd == -1)
 	    err(EXIT_FAILURE, "open");
 
-    if (setns(cfd, 0) == -1)       /* Join that namespace */
+        if (setns(cfd, 0) == -1)       /* Join that namespace */
 	    err(EXIT_FAILURE, "setns");
 	
 	close(cfd);
@@ -65,19 +65,19 @@ int main(int argc, char* argv[]) {
 	char errormsg[MAXLEN], request[MAXLEN], buffer[BUFLEN], container[MINLEN], nspath[MINLEN];
 	FILE* fout;
 
-    if (argc > 1)
+        if (argc > 1)
 		sprintf(container, "%s", argv[1]);
 	else
 		sprintf(container, "%s", "curlybox");
 
-    pid = getpid();
-    memset(nspath, 0, sizeof(nspath));
+        pid = getpid();
+        memset(nspath, 0, sizeof(nspath));
 	sprintf(nspath, "/proc/%d/ns/net", pid);
 	fd = open(nspath, O_RDONLY | O_CLOEXEC);
 	if (fd == -1)
 	    err(EXIT_FAILURE, "open");
 	
-    set_con_ns(container);
+        set_con_ns(container);
 	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 		snprintf(errormsg, sizeof(errormsg), "Error: socket() errno = %d", errno);
 		perror(errormsg);
