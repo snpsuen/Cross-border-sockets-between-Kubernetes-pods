@@ -2,7 +2,7 @@ A POC testbed is set up to demo how a K8s pod opens and processes a TCP/IP socke
 
 ![Kubernetes inter-pod socketing](Namespace_socket_poc02.png)
 
-In this example, the backend pod runs as a popen(3) server that receives shell commands from a client pod, execute them locally and return the results to the client. Instead of the backend pod, the server process creates a socket in the frontend pod to listen and accept popen requests from the client pod. Consequently, the client pod connects to the frontend to send popen requests, which are ready to be picked up and processed by the backend server.
+In this example, the backend pod runs as a popen(3) server that receives shell commands from a client pod, executes them locally and returns the results to the client. Instead of the backend pod, the server process creates a socket in the frontend pod to listen and accept popen requests from the client pod. Consequently, the client pod connects to the frontend to send popen requests, which are ready to be picked up and processed by the backend server.
 
 ### Build a Linux namespace-aware popen(3) server
 
