@@ -14,6 +14,7 @@
 #include <time.h>
 #include <sys/wait.h>
 
+#define NSLEN 8
 #define MINLEN 64
 #define MEDLEN 128
 #define MAXLEN 256
@@ -23,10 +24,10 @@ int set_con_ns(char* container);
 
 int set_con_ns(char* container) {
         char command[MAXLEN], containerid[MINLEN], nspath[MINLEN];
-        char* nslist[] = {"cgroup", "ipc", "mnt", "net", "pid", "time", "user", "uts", NULL};
+        char* nslist[NSLEN] = {"cgroup", "ipc", "mnt", "net", "pid", "time", "user", "uts"}
         FILE* fout;
         int i, cpid, cfd;
-
+        
         memset(command, 0, sizeof(command));
         sprintf(command, "crictl ps | grep %s | cut -d\' \' -f1", container);
         fout = popen(command, "r");
@@ -45,20 +46,20 @@ int set_con_ns(char* container) {
         }
         pclose(fout);
 
-        i = 0;
-        while (nslist[i] != NULL) {
+        for (i = 0; i < NSLEN; i++) {
                 memset(nspath, 0, sizeof(nspath));
                 sprintf(nspath, "/proc/%d/ns/%s", cpid, nslist[i]);
 
+                printf("Calling cfd = open(%s, O_RDONLY | O_CLOEXEC) ...", nspath);
                 cfd = open(nspath, O_RDONLY | O_CLOEXEC);
                 if (cfd == -1)
                         err(EXIT_FAILURE, "open %s", nspath);
+                printf("Open %s = %d\n", nspath, cfd);
 
                 if (setns(cfd, 0) == -1)       /* Join that namespace */
                         err(EXIT_FAILURE, "setns from %s", nspath);
 
                 close(cfd);
-                i++;
         }
 
         return 0;
