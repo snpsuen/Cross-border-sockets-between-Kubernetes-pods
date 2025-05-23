@@ -24,7 +24,7 @@ int set_con_ns(char* container);
 
 int set_con_ns(char* container) {
         char command[MAXLEN], containerid[MINLEN], nspath[MINLEN];
-        char* nslist[NSLEN] = {"cgroup", "ipc", "mnt", "net", "pid", "time", "user", "uts"}
+        char* nslist[NSLEN] = {"cgroup", "ipc", "mnt", "net", "pid", "time", "user", "uts"};
         FILE* fout;
         int i, cpid, cfd;
         
