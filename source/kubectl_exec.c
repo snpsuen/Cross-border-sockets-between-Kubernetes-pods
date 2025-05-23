@@ -21,9 +21,10 @@
 int set_con_ns(char* container);
 
 int set_con_ns(char* container) {
-	char command[256], containerid[64], nspath[64];
+	char command[MAXLEN], containerid[MINLEN], nspath[MINLEN];
+	char* nslist[] = {"cgroup", "ipc", "mnt", "net", "pid, "time", "user", "uts", NULL}
 	FILE* fout;
-	int cpid, cfd;
+	int i, cpid, cfd;
 	
 	memset(command, 0, sizeof(command));
 	sprintf(command, "crictl ps | grep %s | cut -d\' \' -f1", container);
@@ -43,175 +44,64 @@ int set_con_ns(char* container) {
 	}
 	pclose(fout);
 
-        memset(nspath, 0, sizeof(nspath));
-	sprintf(nspath, "/proc/%d/ns/net", cpid);
-	cfd = open(nspath, O_RDONLY | O_CLOEXEC);
-	if (cfd == -1)
-	    err(EXIT_FAILURE, "open");
-
-        if (setns(cfd, 0) == -1)       /* Join that namespace */
-	    err(EXIT_FAILURE, "setns");
-	
-	close(cfd);
+	i = 0;
+	while (nslist[i] != NULL) {
+		memset(nspath, 0, sizeof(nspath));
+		sprintf(nspath, "/proc/%d/ns/%s", cpid, nslist[i]);
+		
+		cfd = open(nspath, O_RDONLY | O_CLOEXEC);
+		if (cfd == -1)
+			err(EXIT_FAILURE, "open %s", nspath);
+		
+		if (setns(cfd, 0) == -1)       /* Join that namespace */
+			err(EXIT_FAILURE, "setns from %s", nspath);
+		
+	        close(cfd);
+		i++;
+	}
 	return 0;
 }
 
 int main(int argc, char* argv[]) {
-	int sock, new, length;
-	int remaining, readin, in_sock, in_req, fd;
-	pid_t child, pid;
-	struct sockaddr_in server, client;
-	char* ptr;
-	char errormsg[MAXLEN], request[MAXLEN], buffer[BUFLEN], container[MINLEN], nspath[MINLEN];
+	int i;
+	pid_t child
+	char* token;
+	char container[MINLEN], execstring[MAXLEN];
+	char* execargv[MAXLEN];
 	FILE* fout;
 
-        if (argc > 1)
-		sprintf(container, "%s", argv[1]);
-	else
-		sprintf(container, "%s", "curlybox");
+	memset(container, 0, sizeof(container));
+	printf("Enter the container name: ");
+	fgets(container, sizeof(container), stdin);
+	container[strlen(container) - 1] = 0;
 
-        pid = getpid();
-        memset(nspath, 0, sizeof(nspath));
-	sprintf(nspath, "/proc/%d/ns/net", pid);
-	fd = open(nspath, O_RDONLY | O_CLOEXEC);
-	if (fd == -1)
-	    err(EXIT_FAILURE, "open");
-	
         set_con_ns(container);
-	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-		snprintf(errormsg, sizeof(errormsg), "Error: socket() errno = %d", errno);
-		perror(errormsg);
-		exit(1);
-	}
-	
-	if (setns(fd, 0) == -1)
-	    err(EXIT_FAILURE, "setns");
-	
-	close(fd);
+	if ((child = fork()) < 0)
+		perror("fork error");
 
-	memset(&server, 0, sizeof(server));
-	server.sin_family = AF_INET;
-	server.sin_addr.s_addr = htonl(INADDR_ANY);
-	server.sin_port = htons(0);
-	length = sizeof(server);
+	if (child == 0) {
+		memset(execstring, 0, sizeof(execstring));
+		printf("Enter the command to exec in %s: ", execstring);
+		fgets(execstring, sizeof(execstring), stdin);
+		execstring[strlen(execstring) - 1] = 0;
 
-	if (bind(sock, (struct sockaddr*)&server, sizeof(server)) < 0) {
-		snprintf(errormsg, sizeof(errormsg), "Error: bind() errno = %d", errno);
-		perror(errormsg);
-		exit(2);
-	}
-
-	if (getsockname(sock, (struct sockaddr*)&server, &length) < 0) {
-		snprintf(errormsg, sizeof(errormsg), "Error: bind() errno = %d", errno);
-		perror(errormsg);
-		exit(3);
-	}
-	printf("Server is listening to port no. %d \n", ntohs(server.sin_port));
-
-	if (listen(sock, 5) < 0) {
-		sprintf(errormsg, "Error: listen() errno = %d", errno);
-		perror(errormsg);
-		exit(4);
-	}
-
-	while (1) {
-		length = sizeof(client);
-		if ((new = accept(sock, (struct sockaddr*)&client, &length)) < 0) {
-			snprintf(errormsg, sizeof(errormsg), "Error: listen() errno = %d", errno);
-			perror(errormsg);
-			exit(5);
+		memset(execargv, NULL, sizeof(execstring));
+		i = 0;
+		token = strtok(execstring, " ");
+		while (token != NULL) {
+			execargv[i] = token;
+			token = strtok(NULL, " ");
+			i++;
 		}
 
-		if (fork() == 0) {
-			close(sock);
-			in_sock = 1;
-
-			while (in_sock) {
-				memset(request, 0, sizeof(request));
-				ptr = request;
-				remaining = sizeof(request);
-				in_req = 1;
-
-				while (in_req) {
-					if ((readin = read(new, ptr, remaining)) < 0) {
-						snprintf(errormsg, sizeof(errormsg), "Error: read () errno = %d", errno);
-						perror(errormsg);
-						in_sock = 0;
-						break;
-					}
-					printf("Read %d bytes from socket ...\n", readin);
-
-					if (readin == 0) {
-						in_req = 0;
-						in_sock = 0;
-						break;
-					}
-
-					if (ptr[readin - 1] == '\n') {
-						ptr[readin - 1] = 0;
-						in_req = 0;
-						break;
-					}
-
-					ptr += readin;
-					remaining -= readin;
-
-					if (remaining == 0) {
-						in_req = 0;
-						break;
-					}
-				}
-
-				if (in_sock == 0)
-						break;
-
-				printf("Server received request %s ...\n", request);
-				strncat(request, " 2>&1", MINLEN);
-				if ((fout = popen(request, "r")) == NULL) {
-					snprintf(errormsg, sizeof(errormsg), "Error: popen () errno = %d", errno);
-					perror(errormsg);
-					continue;
-				}
-
-				memset(buffer, 0, sizeof(buffer));
-				snprintf(buffer, sizeof(buffer), "Output from request %s:\n", request);
-				if (write(new, buffer, strlen(buffer)) < 0) {
-					snprintf(errormsg, sizeof(errormsg), "Error: write() errno = %d", errno);
-					perror(errormsg);
-					in_sock = 0;
-					break;
-				}
-
-				memset(buffer, 0, sizeof(buffer));
-				while(fgets(buffer, sizeof(buffer), fout) != NULL) {
-					if (write(new, buffer, strlen(buffer)) < 0) {
-						snprintf(errormsg, sizeof(errormsg), "Error: write () errno = %d", errno);
-						perror(errormsg);
-						in_sock = 0;
-						break;
-					}
-				}
-
-				memset(buffer, 0, sizeof(buffer));
-				snprintf(buffer, sizeof(buffer), "\nOutput from request ends.\n");
-				if (write(new, buffer, strlen(buffer)) < 0) {
-					snprintf(errormsg, sizeof(errormsg), "Error: write() errno = %d", errno);
-					perror(errormsg);
-					in_sock = 0;
-					break;
-				}
-
-			}
-
-			close(new);
-			exit(0);
-
+		if (execvp(execargv[0], execargv) < 0) {
+			perror("execvp error");
+			exit(1);
 		}
-
-		close(new);
 	}
 
-	close(sock);
+	if (child > 0)
+		waitpid(child. NULL, 0);
+
 	return 0;
-
 }
