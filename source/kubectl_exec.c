@@ -68,7 +68,6 @@ int main(int argc, char* argv[]) {
 	char* token;
 	char container[MINLEN], execstring[MAXLEN];
 	char* execargv[MAXLEN];
-	FILE* fout;
 
 	memset(container, 0, sizeof(container));
 	printf("Enter the container name: ");
