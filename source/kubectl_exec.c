@@ -24,9 +24,8 @@ int set_con_ns(char* container);
 
 int set_con_ns(char* container) {
         char command[MAXLEN], containerid[MINLEN], nspath[MINLEN];
-        char* nslist[NSLEN] = {"cgroup", "ipc", "mnt", "net", "pid", "time", "user", "uts"};
         FILE* fout;
-        int i, cpid, cfd;
+        int cpid, pfd, nsflag;
         
         memset(command, 0, sizeof(command));
         sprintf(command, "crictl ps | grep %s | cut -d\' \' -f1", container);
@@ -46,22 +45,14 @@ int set_con_ns(char* container) {
         }
         pclose(fout);
 
-        for (i = 0; i < NSLEN; i++) {
-                memset(nspath, 0, sizeof(nspath));
-                sprintf(nspath, "/proc/%d/ns/%s", cpid, nslist[i]);
+        if ((pfd = syscall(SYS_pidfd_open, cpid, 0)) == -1)
+                err(EXIT_FAILURE, "pidfd_open %d", cpid);
 
-                printf("Calling cfd = open(%s, O_RDONLY | O_CLOEXEC) ...", nspath);
-                cfd = open(nspath, O_RDONLY | O_CLOEXEC);
-                if (cfd == -1)
-                        err(EXIT_FAILURE, "open %s", nspath);
-                printf("Open %s = %d\n", nspath, cfd);
+        nsflag = CLONE_NEWNET | CLONE_NEWUTS | CLONE_NEWCGROUP | CLONE_NEWIPC | CLONE_NEWNS | CLONE_NEWTIME;
+        if (setns(pfd, nsflag) == -1)
+                err(EXIT_FAILURE, "setns %d %d", pfd, nsflag);
 
-                if (setns(cfd, 0) == -1)       /* Join that namespace */
-                        err(EXIT_FAILURE, "setns from %s", nspath);
-
-                close(cfd);
-        }
-
+        close(pfd);
         return 0;
 }
 
