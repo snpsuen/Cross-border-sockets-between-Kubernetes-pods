@@ -24,7 +24,7 @@
 int set_con_ns(char* container);
 
 int set_con_ns(char* container) {
-        char command[MAXLEN], containerid[MINLEN], nspath[MINLEN];
+        char command[MAXLEN], containerid[MINLEN];
         FILE* fout;
         int cpid, pfd, nsflag;
         
@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
 
         if (child == 0) {
                 memset(execstring, 0, sizeof(execstring));
-                printf("Enter the command to exec in %s: ", execstring);
+                printf("Enter the command to exec in %s: ", container);
                 fgets(execstring, sizeof(execstring), stdin);
                 execstring[strlen(execstring) - 1] = 0;
 
@@ -83,6 +83,7 @@ int main(int argc, char* argv[]) {
                 token = strtok(execstring, " ");
                 while (token != NULL) {
                         execargv[i] = token;
+                        printf("execargv[%d] = %s\n", i, execargv[i]);
                         token = strtok(NULL, " ");
                         i++;
                 }
