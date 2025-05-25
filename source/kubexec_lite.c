@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
                 token = strtok(execstring, " ");
                 while (token != NULL) {
                         execargv[i] = token;
-                        printf("execargv[%d] = %s\n", i, execargv[i]);
+                        /* printf("execargv[%d] = %s\n", i, execargv[i]); */
                         token = strtok(NULL, " ");
                         i++;
                 }
