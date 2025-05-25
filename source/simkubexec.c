@@ -61,18 +61,19 @@ int main(int argc, char* argv[]) {
         pid_t child;
         char* container;
         char** execargv;
-
+        
         if (argc < 2)
                 container = "kube-proxy";
         else
                 container = argv[1];
 
         if (argc < 3) {
-                execargv = calloc(2, siseof(char*));
-                excargv = {"sh", "NULL"};
+                execargv = calloc(2, sizeof(char*));
+                execargv[0] = "sh";
+                execargv[1] = NULL;
         }
         else {
-                execargv = calloc(argc - 1, siseof(char*));
+                execargv = calloc(argc - 1, sizeof(char*));
                 for (i = 0; i < argc - 2; i++)
                         execargv[i] = argv[i + 2];
                 execargv[argc - 2] = NULL;
