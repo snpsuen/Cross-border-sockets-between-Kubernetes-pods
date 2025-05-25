@@ -49,7 +49,7 @@ int set_con_ns(char* container) {
         if ((pfd = syscall(SYS_pidfd_open, cpid, 0)) == -1)
                 err(EXIT_FAILURE, "pidfd_open %d", cpid);
 
-        nsflag = CLONE_NEWNET | CLONE_NEWUTS | CLONE_NEWCGROUP | CLONE_NEWIPC | CLONE_NEWNS | CLONE_NEWTIME;
+        nsflag = CLONE_NEWPID | CLONE_NEWNET | CLONE_NEWUTS | CLONE_NEWCGROUP | CLONE_NEWIPC | CLONE_NEWNS | CLONE_NEWTIME;
         if (setns(pfd, nsflag) == -1)
                 err(EXIT_FAILURE, "setns %d %d", pfd, nsflag);
 
