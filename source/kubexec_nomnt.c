@@ -48,7 +48,7 @@ int set_con_ns(char* container) {
         if ((pfd = syscall(SYS_pidfd_open, cpid, 0)) == -1)
                 err(EXIT_FAILURE, "pidfd_open %d", cpid);
 
-        nsflag = CLONE_NEWPID | CLONE_NEWNET | CLONE_NEWUTS | CLONE_NEWCGROUP | CLONE_NEWIPC | CLONE_NEWNS | CLONE_NEWTIME;
+        nsflag = CLONE_NEWPID | CLONE_NEWNET | CLONE_NEWUTS | CLONE_NEWCGROUP | CLONE_NEWIPC | CLONE_NEWTIME;
         if (setns(pfd, nsflag) == -1)
                 err(EXIT_FAILURE, "setns %d %d", pfd, nsflag);
 
@@ -67,6 +67,7 @@ int main(int argc, char* argv[]) {
         else
                 container = argv[1];
 
+       memset(execstring, 0, sizeof(execstring));
         if (argc < 3)
                 snprintf(execstring, 3, "%s", "sh");
         else {
@@ -75,7 +76,6 @@ int main(int argc, char* argv[]) {
                         strncat(ptr, argv[i + 2], strlen(argv[i + 2]));
                         ptr += strlen(argv[i + 2]);
                 }
-                *ptr = 0;     
         }
 
         set_con_ns(container);
@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
                 perror("fork error");
 
         if (child == 0) {
-                sprintf(fullcommand, "mount -t proc proc /proc; %s", execstring);
+                sprintf(fullcommand, "mount -t proc proc /proc && %s", execstring);
                 if (execl("/bin/sh", "sh", "-c", fullcommand, NULL)) {
                         perror("execl error");
                         exit(1);
