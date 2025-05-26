@@ -95,6 +95,7 @@ int main(int argc, char* argv[]) {
                         perror("Parent mount error");
                 
                 waitpid(child, NULL, 0);
+        }
 
         return 0;
 }
