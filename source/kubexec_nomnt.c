@@ -90,7 +90,10 @@ int main(int argc, char* argv[]) {
                 }
         }
 
-        if (child > 0)
+        if (child > 0) {
+                if (mount("proc", "/proc", "proc", MS_REMOUNT, NULL) == -1)
+                        perror("Parent mount error");
+                
                 waitpid(child, NULL, 0);
 
         return 0;
