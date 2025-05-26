@@ -95,7 +95,7 @@ int main(int argc, char* argv[]) {
 
         if (child > 0) {
                 if (mount("proc", "/proc", "proc", MS_NODEV | MS_NOEXEC | MS_NOSUID, NULL) == -1)
-                  perror("Child mount error");
+                  perror("Parent mount error");
 
                 waitpid(child, NULL, 0);
         }
