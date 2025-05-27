@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <sys/syscall.h>
 #include <sys/socket.h>
-#include <sys/mount.h> 
+#include <sys/mount.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <errno.h>
@@ -88,8 +88,10 @@ int main(int argc, char* argv[]) {
                 perror("fork error");
 
         if (child == 0) {
-                if (mount("proc", "/proc", "proc", MS_NODEV | MS_NOEXEC | MS_NOSUID | MS_PRIVATE, NULL) == -1)
-                        perror("Child mount error");
+                if (mount("none", "/", NULL, MS_REC|MS_PRIVATE, NULL) == -1)
+                        perror("Child mount / error");
+                if (mount("proc", "/proc", "proc", MS_NODEV | MS_NOEXEC | MS_NOSUID, NULL) == -1)
+                        perror("Child mount /proc error");
                 if (execvp(execargv[0], execargv) < 0) {
                         perror("execvp error");
                         exit(1);
